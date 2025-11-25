@@ -13,3 +13,8 @@
    26  sudo ufw allow 8080
    27  sudo ufw reload
 
+
+URL:8080
+
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+

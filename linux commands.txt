@@ -2,3 +2,14 @@
     3  sudo apt upgrade -y
     4  sudo apt install openjdk-17-jdk -y
     5  java --version
+
+  19  curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee   /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+   20  echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]   https://pkg.jenkins.io/debian-stable binary/ | sudo tee   /etc/apt/sources.list.d/jenkins.list > /dev/null
+   21  sudo apt update
+   22  sudo apt install jenkins -y
+   23  sudo systemctl start jenkins
+   24  sudo systemctl enable jenkins
+   25  sudo systemctl status jenkins
+   26  sudo ufw allow 8080
+   27  sudo ufw reload
+

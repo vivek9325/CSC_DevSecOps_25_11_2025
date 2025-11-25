@@ -51,4 +51,7 @@ $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev
    25  history
 sudo usermod -aG docker $USER
 
+15  docker run -itd --name sonarqube-server -p 9000:9000 sonarqube:lts-community
+
+
 

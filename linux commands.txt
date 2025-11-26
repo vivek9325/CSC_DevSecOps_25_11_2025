@@ -93,3 +93,27 @@ docker commands
 
 
 
+
+
+ubuntu@ip-172-31-29-31:~/myapp$ ll
+total 16
+drwxrwxr-x 2 ubuntu ubuntu 4096 Nov 26 11:59 ./
+drwxr-x--- 7 ubuntu ubuntu 4096 Nov 26 11:58 ../
+-rw-rw-r-- 1 ubuntu ubuntu   68 Nov 26 11:59 Dockerfile
+-rw-rw-r-- 1 ubuntu ubuntu   33 Nov 26 11:53 app.js
+ubuntu@ip-172-31-29-31:~/myapp$ cat Dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY . .
+
+CMD ["node", "app.js"]
+ubuntu@ip-172-31-29-31:~/myapp$ cat app.js
+console.log("Hello from Docker")
+ubuntu@ip-172-31-29-31:~/myapp$ docker build -t myapp:v1 .
+
+
+
+
+

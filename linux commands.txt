@@ -118,5 +118,23 @@ ubuntu@ip-172-31-29-31:~/myapp$ docker build -t myapp:v1 .
 
 
 
+ 142  docker ps -a
+  143  docker images
+  144  docker rmi f7931603f70e
+  145  sudo docker rmi f7931603f70e
+  146  docker stop a9814c9b7d91
+  147  sudo docker rmi f7931603f70e
+  148  docker clear
+  149  clear
+  150  docker images
+  151  docker ps -a
+  152  docker rm a9814c9b7d91
+  153  docker ps -a
+  154  docker rmi f7931603f70e
+  155  docker images
+  156  history
+
+
+
 
 

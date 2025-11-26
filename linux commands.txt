@@ -114,6 +114,9 @@ console.log("Hello from Docker")
 ubuntu@ip-172-31-29-31:~/myapp$ docker build -t myapp:v1 .
 
 
+ docker run --name myapp-container myapp:v1
+
+
 
 
 

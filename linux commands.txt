@@ -67,4 +67,29 @@ Trivy ---
    86  history
 
 
+docker commands
+
+
+
+ 133  docker ps
+  134  docker ps -a
+  135  docker run a9814c9b7d91
+  136  sudo docker run a9814c9b7d91
+  137  docker start a9814c9b7d91
+  138  clear
+  139  docker log a9814c9b7d91
+  140  docker logs a9814c9b7d91
+  141  docker ps
+  142  docker logs 932b7460854f
+  143  docker stop 932b7460854f
+  144  docker ps
+  145  docker ps -a
+  146  docker start 932b7460854f
+  147  docker ps
+  148  clear
+  149  ls
+  150  history
+
+
+
 

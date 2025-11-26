@@ -54,4 +54,17 @@ sudo usermod -aG docker $USER
 15  docker run -itd --name sonarqube-server -p 9000:9000 sonarqube:lts-community
 
 
+Trivy ---
+
+  78  sudo apt update
+   79  sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+   80  wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+   81  echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+   82  sudo apt-get update
+   83  sudo apt-get install trivy -y
+   84  trivy --version
+   85  clear
+   86  history
+
+
 

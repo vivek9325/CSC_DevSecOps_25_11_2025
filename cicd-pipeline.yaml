@@ -3,27 +3,35 @@ pipeline{
     agent any
     environment {
         SONAR_HOME = tool "Sonar"
+        APP_URL = "http://localhost:8080"   // URL where wanderlust app is available after docker-compose
     }
+
     stages{
         stage("Clone Code from GitHub"){
             steps{
                 git url:"https://github.com/krishnaacharyaa/wanderlust.git", branch: "devops"
             }
         }
+
         stage("SonarQube Quality Analysis"){
             steps{
-                withSonarQubeEnv("Sonar")
-                {
-                    sh "$SONAR_HOME/bin/sonar-scanner -Dsonar.projectName=wanderlust -Dsonar.projectKey=wanderlust"
+                withSonarQubeEnv("Sonar") {
+                    sh """
+                      $SONAR_HOME/bin/sonar-scanner \
+                        -Dsonar.projectName=wanderlust \
+                        -Dsonar.projectKey=wanderlust
+                    """
                 }
             }
         }
+
         stage("OWASP Dependency Check"){
             steps{
                 dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'dependency'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
+
         stage("Sonar Qualty Gate Scan"){
             steps{
                 timeout(time: 2, unit: "MINUTES"){
@@ -31,19 +39,79 @@ pipeline{
                 }
             }
         }
-        
+
         stage("Trivy File System Scan"){
             steps{
                 sh "trivy fs --format table -o trivy-fs-report.html ."
             }
         }
-        
+
         stage("Deploy using Docker Compose"){
             steps{
+                // app must be UP before DAST
                 sh "docker-compose up -d"
             }
         }
-        
+
+        // 🔥 NEW: DAST stage using OWASP ZAP (runs against running app)
+        stage("DAST Scan - OWASP ZAP"){
+            steps{
+                sh '''
+                  mkdir -p zap-reports
+
+                 docker run --rm \
+            -v $PWD/zap-reports:/zap/wrk \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-full-scan.py \
+              -t http://localhost:8080 \
+              -r zap_dast_report.html \
+              -J zap_dast_report.json \
+              -z "-config scanner.attackOnStart=true"
+                '''
+            }
+            post {
+                always {
+                    // archive and (optionally) publish HTML report
+                    archiveArtifacts artifacts: 'zap-reports/**', fingerprint: true
+
+                    // requires "HTML Publisher" plugin
+                    publishHTML(target: [
+                        reportDir: 'zap-reports',
+                        reportFiles: 'zap_dast_report.html',
+                        reportName: 'OWASP ZAP DAST Report'
+                    ])
+                }
+            }
+        }
+
+        // ✅ OPTIONAL BUT GOOD: fail pipeline on High-risk findings
+        stage("DAST Gate"){
+            steps{
+                sh '''
+                  # If jq is installed, use it to count High alerts
+                  if command -v jq >/dev/null 2>&1; then
+                    HIGH=$(jq '[.site[].alerts[] | select(.risk == "High")] | length' zap-reports/zap_dast_report.json)
+                  else
+                    # Fallback: simple grep (less accurate, but works)
+                    HIGH=$(grep -o '"risk":"High"' zap-reports/zap_dast_report.json | wc -l || true)
+                  fi
+
+                  echo "High risk alerts found by ZAP: $HIGH"
+
+                  if [ "$HIGH" -gt 0 ]; then
+                    echo "Failing build due to High risk DAST findings."
+                    exit 1
+                  fi
+                '''
+            }
+        }
     }
-    
+
+    // (Optional) tear down environment after pipeline
+    post {
+        always {
+            // stop and remove containers after tests
+            sh 'docker-compose down || true'
+        }
+    }
 }

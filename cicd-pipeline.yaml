@@ -54,35 +54,24 @@ pipeline{
         }
 
         // 🔥 NEW: DAST stage using OWASP ZAP (runs against running app)
-        stage("DAST Scan - OWASP ZAP"){
-            steps{
-                sh '''
-                  mkdir -p zap-reports
+      stage("DAST Scan - OWASP ZAP"){
+    steps{
+        sh '''
+          mkdir -p zap-reports
+          chmod -R 777 zap-reports || true
 
-                 docker run --rm \
-            -v $PWD/zap-reports:/zap/wrk \
+          docker run --rm \
+            -v /var/lib/jenkins/workspace/wanderlust-cicd/zap-reports:/zap/wrk \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-full-scan.py \
-              -t http://localhost:8080 \
+              -t http://34.235.89.124:5173 \
               -r zap_dast_report.html \
               -J zap_dast_report.json \
-              -z "-config scanner.attackOnStart=true"
-                '''
-            }
-            post {
-                always {
-                    // archive and (optionally) publish HTML report
-                    archiveArtifacts artifacts: 'zap-reports/**', fingerprint: true
-
-                    // requires "HTML Publisher" plugin
-                    publishHTML(target: [
-                        reportDir: 'zap-reports',
-                        reportFiles: 'zap_dast_report.html',
-                        reportName: 'OWASP ZAP DAST Report'
-                    ])
-                }
-            }
-        }
+              -z "-config scanner.attackOnStart=true" \
+            || true   # <- IMPORTANT: do not fail Jenkins on ZAP exit code
+        '''
+    }
+}
 
         // ✅ OPTIONAL BUT GOOD: fail pipeline on High-risk findings
         stage("DAST Gate"){

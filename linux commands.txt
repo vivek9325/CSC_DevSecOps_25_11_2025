@@ -135,6 +135,12 @@ ubuntu@ip-172-31-29-31:~/myapp$ docker build -t myapp:v1 .
   156  history
 
 
+docker-compose 
+
+
+sudo apt update
+sudo apt install docker-compose -y
+
 
 
 
